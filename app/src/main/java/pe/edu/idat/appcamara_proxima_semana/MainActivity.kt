@@ -34,7 +34,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun compartirFoto() {
-        TODO("Not yet implemented")
+        if(rutaFotoActual != ""){
+            val fotoUri = obtenerContenidoUri(File(rutaFotoActual))
+            val intentImagen = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, fotoUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                type = "image/jpeg"
+            }
+            val chooser = Intent.createChooser(intentImagen,
+                "Compartir Foto")
+            if(intentImagen.resolveActivity(packageManager) != null){
+                startActivity(chooser)
+            }
+        }
     }
 
     private fun tomarFoto() {
@@ -43,12 +56,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             it.resolveActivity(packageManager).also {
                 componente ->
                 crearArchivoFoto()
-                val fotoUri: Uri =
-                    FileProvider.getUriForFile(
-                        applicationContext,
-                        "pe.edu.idat.appcamara_proxima_semana.fileprovider",
-                        file
-                    )
+                val fotoUri: Uri = obtenerContenidoUri(file);
                 it.putExtra(MediaStore.EXTRA_OUTPUT, fotoUri)
             }
         }
@@ -75,5 +83,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun obtenerImagenBitmap(): Bitmap{
         return BitmapFactory.decodeFile(file.toString())
+    }
+
+    private fun obtenerContenidoUri(archivoFoto: File): Uri{
+        return FileProvider.getUriForFile(
+            applicationContext,
+            "pe.edu.idat.appcamara_proxima_semana.fileprovider",
+            archivoFoto
+        )
     }
 }
